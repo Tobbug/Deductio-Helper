@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deductio Autosolver</title>
+    <!-- Tailwind CSS for modern, instant styling -->
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        .disabled-number {
+            background-color: #ef4444 !important;
+            text-decoration: line-through;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans p-4">
+
+    <!-- Header Section -->
+    <header class="text-center my-4">
+        <h1 class="text-3xl font-extrabold tracking-tight text-indigo-400">🧠 DEDUCTIO</h1>
+        <p class="text-xs text-slate-400 mt-1">Real-Time Logic Elimination Companion</p>
+    </header>
+
+    <main class="max-w-md mx-auto w-full flex-grow flex flex-col gap-6">
+        
+        <!-- Player Tracking Grid Display -->
+        <section class="bg-slate-800 rounded-2xl p-4 shadow-xl border border-slate-700/50">
+            <h2 class="text-sm font-bold text-slate-400 tracking-wider uppercase mb-3">Opponent's Possible Numbers</h2>
+            <div id="numberGrid" class="grid grid-cols-5 gap-2 text-center">
+                <!-- Numbers 1-20 will be auto-generated here by JavaScript -->
+            </div>
+            
+            <!-- Target Match Notification -->
+            <div id="solutionAlert" class="hidden mt-4 p-3 bg-emerald-500/20 border border-emerald-500 rounded-xl text-center text-emerald-400 font-bold animate-pulse">
+                🎯 TARGET DETECTED!
+            </div>
+        </section>
+
+        <!-- Elimination Control Buttons -->
+        <section class="bg-slate-800 rounded-2xl p-4 shadow-xl border border-slate-700/50 flex flex-col gap-3">
+            <h2 class="text-sm font-bold text-slate-400 tracking-wider uppercase mb-1">Log Clues</h2>
+            
+            <!-- Parity Filters -->
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="filterParity(true)" class="bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition text-white py-3 rounded-xl font-bold shadow-md">EVEN</button>
+                <button onclick="filterParity(false)" class="bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition text-white py-3 rounded-xl font-bold shadow-md">ODD</button>
+            </div>
+
+            <!-- Quantitative Boundaries -->
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="promptBoundary('min')" class="bg-slate-700 hover:bg-slate-600 active:scale-95 transition py-3 rounded-xl font-semibold border border-slate-600">Greater Than (>)</button>
+                <button onclick="promptBoundary('max')" class="bg-slate-700 hover:bg-slate-600 active:scale-95 transition py-3 rounded-xl font-semibold border border-slate-600">Less Than (<)</button>
+            </div>
+
+            <!-- Single Specific Target Elimination -->
+            <button onclick="promptEliminateSingle()" class="w-full bg-slate-700 hover:bg-slate-600 active:scale-95 transition py-3 rounded-xl font-semibold border border-slate-600">Eliminate Specific Number</button>
+
+            <hr class="border-slate-700/50 my-1">
+
+            <!-- Reset Application Session Stack -->
+            <button onclick="resetGame()" class="w-full bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white transition py-2.5 rounded-xl font-medium border border-rose-500/30 text-sm">Reset Board State</button>
+        </section>
+
+    </main>
+
+    <!-- App Engine Logic JavaScript -->
+    <script>
+        // Core state tracker
+        let possibleNumbers = Array.from({length: 20}, (_, i) => i + 1);
+
+        // Generate the visual grid layout
+        function renderGrid() {
+            const grid = document.getElementById('numberGrid');
+            grid.innerHTML = '';
+            
+            for(let i = 1; i <= 20; i++) {
+                const numElement = document.createElement('div');
+                numElement.innerText = i;
+                numElement.className = "py-3 rounded-xl font-bold text-lg bg-slate-700 text-slate-100 transition duration-150 cursor-pointer shadow";
+                
+                // If number was eliminated, apply style modifications
+                if(!possibleNumbers.includes(i)) {
+                    numElement.classList.add('disabled-number');
+                } else {
+                    // Clicking a number manually eliminates it
+                    numElement.onclick = () => eliminateSingleNumber(i);
+                }
+                grid.appendChild(numElement);
+            }
+
+            // Check if application arrived at a solution
+            const alertBox = document.getElementById('solutionAlert');
+            if (possibleNumbers.length === 1) {
+                alertBox.innerText = `🎯 CHOSEN CARD IS: ${possibleNumbers[0]}`;
+                alertBox.classList.remove('hidden');
+            } else if (possibleNumbers.length === 0) {
+                alertBox.innerText = `⚠️ Logic Conflict: 0 possibilities left!`;
+                alertBox.classList.remove('hidden');
+                alertBox.classList.replace('bg-emerald-500/20', 'bg-rose-500/20');
+                alertBox.classList.replace('border-emerald-500', 'border-rose-500');
+                alertBox.classList.replace('text-emerald-400', 'text-rose-400');
+            } else {
+                alertBox.className = "hidden mt-4 p-3 bg-emerald-500/20 border border-emerald-500 rounded-xl text-center text-emerald-400 font-bold animate-pulse";
+            }
+        }
+
+        // Logic Filter Rule: Evens vs Odds
+        function filterParity(isEven) {
+            possibleNumbers = possibleNumbers.filter(n => isEven ? (n % 2 === 0) : (n % 2 !== 0));
+            renderGrid();
+        }
+
+        // Logic Filter Rule: Threshold Limits
+        function promptBoundary(type) {
+            const val = parseInt(prompt(`Enter the threshold number constraint:`));
+            if(isNaN(val)) return;
+
+            if(type === 'min') {
+                possibleNumbers = possibleNumbers.filter(n => n > val);
+            } else if(type === 'max') {
+                possibleNumbers = possibleNumbers.filter(n => n < val);
+            }
+            renderGrid();
+        }
+
+        // Logic Filter Rule: Individual Deletions
+        function eliminateSingleNumber(num) {
+            possibleNumbers = possibleNumbers.filter(n => n !== num);
+            renderGrid();
+        }
+
+        function promptEliminateSingle() {
+            const val = parseInt(prompt("Enter explicit number to eliminate (e.g., table setup cards):"));
+            if(!isNaN(val)) eliminateSingleNumber(val);
+        }
+
+        // Total Session Wipe
+        function resetGame() {
+            possibleNumbers = Array.from({length: 20}, (_, i) => i + 1);
+            renderGrid();
+        }
+
+        // Initialize display execution loop on document load
+        renderGrid();
+    </script>
+</body>
+</html>
