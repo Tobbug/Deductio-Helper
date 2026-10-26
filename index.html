@@ -1,148 +1,526 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deductio Autosolver</title>
-    <!-- Tailwind CSS for modern, instant styling -->
-    <script src="https://jsdelivr.net"></script>
-    <style>
-        .disabled-number {
-            background-color: #ef4444 !important;
-            text-decoration: line-through;
-            opacity: 0.3;
-        }
-    </style>
-</head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans p-4">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🧠 Deductio Helper</title>
+  <style>
+    :root {
+      --bg-color: #121212;
+      --card-bg: #1e1e2e;
+      --card-border: #2a2a3d;
+      --accent-color: #4f46e5;
+      --text-color: #f3f4f6;
+      --text-muted: #9ca3af;
+      --btn-bg: #374151;
+      --btn-hover: #4b5563;
+      --number-bg: #2d3748;
+      --number-hover: #4a5568;
+    }
 
-    <!-- Header Section -->
-    <header class="text-center my-4">
-        <h1 class="text-3xl font-extrabold tracking-tight text-indigo-400">🧠 DEDUCTIO</h1>
-        <p class="text-xs text-slate-400 mt-1">Real-Time Logic Elimination Companion</p>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background-color: var(--card-bg);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn-secondary {
+      background-color: var(--btn-bg);
+      color: var(--text-color);
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--btn-hover);
+    }
+
+    .btn-icon {
+      background-color: var(--btn-bg);
+      color: var(--text-color);
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: background 0.2s, opacity 0.2s;
+    }
+
+    .btn-icon:hover:not(:disabled) {
+      background-color: var(--btn-hover);
+    }
+
+    .btn-icon:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* Écran de sélection */
+    #setup-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      gap: 20px;
+      text-align: center;
+    }
+
+    .player-buttons {
+      display: flex;
+      gap: 15px;
+    }
+
+    .btn-player {
+      background-color: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 16px 32px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+
+    .btn-player:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+
+    /* Zone principale de jeu */
+    #notes-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 15px;
+      gap: 15px;
+    }
+
+    .game-layout {
+      display: grid;
+      grid-template-rows: 1fr 1fr;
+      gap: 15px;
+      flex: 1;
+      height: calc(100vh - 80px);
+    }
+
+    .top-section, .bottom-section {
+      display: grid;
+      gap: 15px;
+      width: 100%;
+    }
+
+    .cols-1 {
+      grid-template-columns: 1fr;
+    }
+
+    .cols-2 {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .panel {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .panel-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #818cf8;
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .player-name-input {
+      background: transparent;
+      border: 1px solid transparent;
+      color: #818cf8;
+      font-size: 1.1rem;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 4px;
+      width: 100%;
+      outline: none;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .player-name-input:hover, .player-name-input:focus {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--card-border);
+    }
+
+    .edit-icon {
+      cursor: pointer;
+      font-size: 0.95rem;
+      opacity: 0.6;
+      user-select: none;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .edit-icon:hover {
+      opacity: 1;
+      transform: scale(1.15);
+    }
+
+    .options-panel {
+      background-color: #1e293b;
+      border-color: #334155;
+    }
+
+    .options-panel .panel-title {
+      color: #38bdf8;
+    }
+
+    /* Grille de numéros */
+    .numbers-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      margin-top: 5px;
+    }
+
+    .num-btn {
+      background-color: var(--number-bg);
+      color: var(--text-color);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      aspect-ratio: 1;
+      font-size: 2rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, opacity 0.15s, transform 0.1s;
+      user-select: none;
+    }
+
+    .num-btn:hover {
+      background-color: var(--number-hover);
+      transform: scale(1.05);
+    }
+
+    .num-btn.hidden-num {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* Options d'indices en dessous des numéros */
+    .filter-options {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .filter-btn {
+      flex: 1;
+      background-color: #2b2d42;
+      color: var(--text-color);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 6px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .filter-btn:hover {
+      background-color: #404360;
+      transform: translateY(-1px);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Écran de sélection initial -->
+  <div id="setup-screen">
+    <h1>🧠 Deductio Helper</h1>
+    <p>Nombre total de joueurs :</p>
+    <div class="player-buttons">
+      <button class="btn-player" data-players="2">2 Joueurs</button>
+      <button class="btn-player" data-players="3">3 Joueurs</button>
+      <button class="btn-player" data-players="4">4 Joueurs</button>
+    </div>
+  </div>
+
+  <!-- Écran de jeu / Prise de notes -->
+  <div id="notes-screen" class="hidden">
+    <header>
+      <h2>🧠 Deductio Helper</h2>
+      <div class="header-actions">
+        <button class="btn-icon" id="btn-undo" title="Annuler le dernier effacement" disabled>🔄</button>
+        <button class="btn-secondary" id="btn-reset">Nouvelle Partie</button>
+      </div>
     </header>
 
-    <main class="max-w-md mx-auto w-full flex-grow flex flex-col gap-6">
+    <div class="game-layout">
+      <!-- Partie Supérieure -->
+      <div id="top-section" class="top-section"></div>
+
+      <!-- Partie Inférieure -->
+      <div id="bottom-section" class="bottom-section"></div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const setupScreen = document.getElementById('setup-screen');
+      const notesScreen = document.getElementById('notes-screen');
+      const topSection = document.getElementById('top-section');
+      const bottomSection = document.getElementById('bottom-section');
+      const btnReset = document.getElementById('btn-reset');
+      const btnUndo = document.getElementById('btn-undo');
+
+      let actionHistory = [];
+
+      document.querySelectorAll('.btn-player').forEach(button => {
+        button.addEventListener('click', () => {
+          const totalPlayers = parseInt(button.getAttribute('data-players'));
+          startGame(totalPlayers);
+        });
+      });
+
+      btnReset.addEventListener('click', resetGame);
+      btnUndo.addEventListener('click', undoLastAction);
+
+      function startGame(totalPlayers) {
+        setupScreen.classList.add('hidden');
+        notesScreen.classList.remove('hidden');
+
+        topSection.innerHTML = '';
+        bottomSection.innerHTML = '';
+        actionHistory = [];
+        updateUndoButton();
+
+        if (totalPlayers === 2) {
+          topSection.className = 'top-section cols-1';
+          topSection.appendChild(createPlayerPanel('Joueur 1'));
+
+          bottomSection.className = 'bottom-section cols-1';
+          bottomSection.appendChild(createOptionsPanel());
+        } 
+        else if (totalPlayers === 3) {
+          topSection.className = 'top-section cols-2';
+          topSection.appendChild(createPlayerPanel('Joueur 1'));
+          topSection.appendChild(createPlayerPanel('Joueur 2'));
+
+          bottomSection.className = 'bottom-section cols-1';
+          bottomSection.appendChild(createOptionsPanel());
+        } 
+        else if (totalPlayers === 4) {
+          topSection.className = 'top-section cols-2';
+          topSection.appendChild(createPlayerPanel('Joueur 1'));
+          topSection.appendChild(createPlayerPanel('Joueur 2'));
+
+          bottomSection.className = 'bottom-section cols-2';
+          bottomSection.appendChild(createPlayerPanel('Joueur 3'));
+          bottomSection.appendChild(createOptionsPanel());
+        }
+      }
+
+      function createPlayerPanel(name) {
+        const panel = document.createElement('div');
+        panel.className = 'panel';
+        panel.innerHTML = `
+          <div class="panel-title">
+            <input type="text" value="${name}" class="player-name-input">
+            <span class="edit-icon" title="Modifier le nom">✏️</span>
+          </div>
+          <div class="panel-content">
+            <div class="numbers-grid">
+              ${createNumbersButtonsHTML()}
+            </div>
+            <div class="filter-options">
+              <div class="filter-group parity-group">
+              <button class="filter-btn" data-action="impair">|</button>
+                <button class="filter-btn" data-action="pair">||</button>
+              </div>
+              <div class="filter-group digits-group">
+                <button class="filter-btn" data-action="single-digit" title="Nombre à 1 chiffre (1-9)">#</button>
+                <button class="filter-btn" data-action="double-digit" title="Nombre à 2 chiffres (10-20)">##</button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        const input = panel.querySelector('.player-name-input');
+        const icon = panel.querySelector('.edit-icon');
+
+        icon.addEventListener('click', () => {
+          input.focus();
+          input.select();
+        });
+
+        // Gestion des boutons de filtres (Pair/Impair et #/##)
+        panel.querySelectorAll('.filter-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const action = btn.getAttribute('data-action');
+            const parentGroup = btn.closest('.filter-group');
+
+            let numberButtonsToHide = [];
+
+            if (action === 'pair') {
+              numberButtonsToHide = getVisibleNumbers(panel, val => val % 2 !== 0);
+            } else if (action === 'impair') {
+              numberButtonsToHide = getVisibleNumbers(panel, val => val % 2 === 0);
+            } else if (action === 'single-digit') {
+              numberButtonsToHide = getVisibleNumbers(panel, val => val >= 10);
+            } else if (action === 'double-digit') {
+              numberButtonsToHide = getVisibleNumbers(panel, val => val < 10);
+            }
+
+            numberButtonsToHide.forEach(numBtn => numBtn.classList.add('hidden-num'));
+            parentGroup.classList.add('hidden');
+
+            actionHistory.push({
+              type: 'filter',
+              buttons: numberButtonsToHide,
+              groupContainer: parentGroup
+            });
+            updateUndoButton();
+          });
+        });
+
+        // Événement au clic sur un nombre individuel
+        panel.querySelectorAll('.num-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            hideSingleButton(btn);
+          });
+        });
+
+        return panel;
+      }
+
+      function getVisibleNumbers(panel, predicate) {
+        return Array.from(panel.querySelectorAll('.num-btn')).filter(btn => {
+          if (btn.classList.contains('hidden-num')) return false;
+          const val = parseInt(btn.getAttribute('data-num'));
+          return predicate(val);
+        });
+      }
+
+      function createOptionsPanel() {
+        const panel = document.createElement('div');
+        panel.className = 'panel options-panel';
+        panel.innerHTML = `
+          <div class="panel-title">Nombres Connus</div>
+          <div class="panel-content">
+            <div class="numbers-grid">
+              ${createNumbersButtonsHTML()}
+            </div>
+          </div>
+        `;
+
+        // Événement au clic sur un nombre dans "Mes Options"
+        panel.querySelectorAll('.num-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const num = parseInt(btn.getAttribute('data-num'));
+            hideAllButtonsOfValue(num);
+          });
+        });
+
+        return panel;
+      }
+
+      function createNumbersButtonsHTML() {
+        let html = '';
+        for (let i = 1; i <= 20; i++) {
+          html += `<button class="num-btn" data-num="${i}">${i}</button>`;
+        }
+        return html;
+      }
+
+      function hideSingleButton(btn) {
+        if (btn.classList.contains('hidden-num')) return;
+
+        btn.classList.add('hidden-num');
+        actionHistory.push({ type: 'single', buttons: [btn] });
+        updateUndoButton();
+      }
+
+      function hideAllButtonsOfValue(num) {
+        const allMatchingButtons = Array.from(document.querySelectorAll(`.num-btn[data-num="${num}"]`))
+          .filter(btn => !btn.classList.contains('hidden-num'));
+
+        if (allMatchingButtons.length === 0) return;
+
+        allMatchingButtons.forEach(btn => btn.classList.add('hidden-num'));
+        actionHistory.push({ type: 'all', buttons: allMatchingButtons });
+        updateUndoButton();
+      }
+
+      function undoLastAction() {
+        if (actionHistory.length === 0) return;
+
+        const lastAction = actionHistory.pop();
+        lastAction.buttons.forEach(btn => btn.classList.remove('hidden-num'));
         
-        <!-- Player Tracking Grid Display -->
-        <section class="bg-slate-800 rounded-2xl p-4 shadow-xl border border-slate-700/50">
-            <h2 class="text-sm font-bold text-slate-400 tracking-wider uppercase mb-3">Opponent's Possible Numbers</h2>
-            <div id="numberGrid" class="grid grid-cols-5 gap-2 text-center">
-                <!-- Numbers 1-20 will be auto-generated here by JavaScript -->
-            </div>
-            
-            <!-- Target Match Notification -->
-            <div id="solutionAlert" class="hidden mt-4 p-3 bg-emerald-500/20 border border-emerald-500 rounded-xl text-center text-emerald-400 font-bold animate-pulse">
-                🎯 TARGET DETECTED!
-            </div>
-        </section>
-
-        <!-- Elimination Control Buttons -->
-        <section class="bg-slate-800 rounded-2xl p-4 shadow-xl border border-slate-700/50 flex flex-col gap-3">
-            <h2 class="text-sm font-bold text-slate-400 tracking-wider uppercase mb-1">Log Clues</h2>
-            
-            <!-- Parity Filters -->
-            <div class="grid grid-cols-2 gap-2">
-                <button onclick="filterParity(true)" class="bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition text-white py-3 rounded-xl font-bold shadow-md">EVEN</button>
-                <button onclick="filterParity(false)" class="bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition text-white py-3 rounded-xl font-bold shadow-md">ODD</button>
-            </div>
-
-            <!-- Quantitative Boundaries -->
-            <div class="grid grid-cols-2 gap-2">
-                <button onclick="promptBoundary('min')" class="bg-slate-700 hover:bg-slate-600 active:scale-95 transition py-3 rounded-xl font-semibold border border-slate-600">Greater Than (>)</button>
-                <button onclick="promptBoundary('max')" class="bg-slate-700 hover:bg-slate-600 active:scale-95 transition py-3 rounded-xl font-semibold border border-slate-600">Less Than (<)</button>
-            </div>
-
-            <!-- Single Specific Target Elimination -->
-            <button onclick="promptEliminateSingle()" class="w-full bg-slate-700 hover:bg-slate-600 active:scale-95 transition py-3 rounded-xl font-semibold border border-slate-600">Eliminate Specific Number</button>
-
-            <hr class="border-slate-700/50 my-1">
-
-            <!-- Reset Application Session Stack -->
-            <button onclick="resetGame()" class="w-full bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white transition py-2.5 rounded-xl font-medium border border-rose-500/30 text-sm">Reset Board State</button>
-        </section>
-
-    </main>
-
-    <!-- App Engine Logic JavaScript -->
-    <script>
-        // Core state tracker
-        let possibleNumbers = Array.from({length: 20}, (_, i) => i + 1);
-
-        // Generate the visual grid layout
-        function renderGrid() {
-            const grid = document.getElementById('numberGrid');
-            grid.innerHTML = '';
-            
-            for(let i = 1; i <= 20; i++) {
-                const numElement = document.createElement('div');
-                numElement.innerText = i;
-                numElement.className = "py-3 rounded-xl font-bold text-lg bg-slate-700 text-slate-100 transition duration-150 cursor-pointer shadow";
-                
-                // If number was eliminated, apply style modifications
-                if(!possibleNumbers.includes(i)) {
-                    numElement.classList.add('disabled-number');
-                } else {
-                    // Clicking a number manually eliminates it
-                    numElement.onclick = () => eliminateSingleNumber(i);
-                }
-                grid.appendChild(numElement);
-            }
-
-            // Check if application arrived at a solution
-            const alertBox = document.getElementById('solutionAlert');
-            if (possibleNumbers.length === 1) {
-                alertBox.innerText = `🎯 CHOSEN CARD IS: ${possibleNumbers[0]}`;
-                alertBox.classList.remove('hidden');
-            } else if (possibleNumbers.length === 0) {
-                alertBox.innerText = `⚠️ Logic Conflict: 0 possibilities left!`;
-                alertBox.classList.remove('hidden');
-                alertBox.classList.replace('bg-emerald-500/20', 'bg-rose-500/20');
-                alertBox.classList.replace('border-emerald-500', 'border-rose-500');
-                alertBox.classList.replace('text-emerald-400', 'text-rose-400');
-            } else {
-                alertBox.className = "hidden mt-4 p-3 bg-emerald-500/20 border border-emerald-500 rounded-xl text-center text-emerald-400 font-bold animate-pulse";
-            }
+        if (lastAction.groupContainer) {
+          lastAction.groupContainer.classList.remove('hidden');
         }
 
-        // Logic Filter Rule: Evens vs Odds
-        function filterParity(isEven) {
-            possibleNumbers = possibleNumbers.filter(n => isEven ? (n % 2 === 0) : (n % 2 !== 0));
-            renderGrid();
-        }
+        updateUndoButton();
+      }
 
-        // Logic Filter Rule: Threshold Limits
-        function promptBoundary(type) {
-            const val = parseInt(prompt(`Enter the threshold number constraint:`));
-            if(isNaN(val)) return;
+      function updateUndoButton() {
+        btnUndo.disabled = actionHistory.length === 0;
+      }
 
-            if(type === 'min') {
-                possibleNumbers = possibleNumbers.filter(n => n > val);
-            } else if(type === 'max') {
-                possibleNumbers = possibleNumbers.filter(n => n < val);
-            }
-            renderGrid();
-        }
-
-        // Logic Filter Rule: Individual Deletions
-        function eliminateSingleNumber(num) {
-            possibleNumbers = possibleNumbers.filter(n => n !== num);
-            renderGrid();
-        }
-
-        function promptEliminateSingle() {
-            const val = parseInt(prompt("Enter explicit number to eliminate (e.g., table setup cards):"));
-            if(!isNaN(val)) eliminateSingleNumber(val);
-        }
-
-        // Total Session Wipe
-        function resetGame() {
-            possibleNumbers = Array.from({length: 20}, (_, i) => i + 1);
-            renderGrid();
-        }
-
-        // Initialize display execution loop on document load
-        renderGrid();
-    </script>
+      function resetGame() {
+        notesScreen.classList.add('hidden');
+        setupScreen.classList.remove('hidden');
+      }
+    });
+  </script>
 </body>
 </html>
