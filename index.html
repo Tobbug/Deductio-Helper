@@ -5,17 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🔍 Deductio Helper</title>
   <style>
+    /* Variables par défaut (Thème Sombre) */
     :root {
       --bg-color: #121212;
       --card-bg: #1e1e2e;
       --card-border: #2a2a3d;
-      --accent-color: #4f46e5;
+      --accent-color: #467be5;
       --text-color: #f3f4f6;
       --text-muted: #9ca3af;
       --btn-bg: #374151;
       --btn-hover: #4b5563;
       --number-bg: #2d3748;
       --number-hover: #4a5568;
+    }
+
+    /* Thème Clair */
+    body.light-theme {
+      --bg-color: #f3f4f6;
+      --card-bg: #ffffff;
+      --card-border: #e5e7eb;
+      --accent-color: #4f46e5;
+      --text-color: #1f2937;
+      --text-muted: #6b7280;
+      --btn-bg: #e5e7eb;
+      --btn-hover: #d1d5db;
+      --number-bg: #f9fafb;
+      --number-hover: #f3f4f6;
     }
 
     * {
@@ -32,6 +47,7 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      transition: background-color 0.2s, color 0.2s;
     }
 
     header {
@@ -124,10 +140,33 @@
       flex: 1;
       min-width: 90px;
       transition: transform 0.1s, opacity 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
     }
 
     .btn-player:hover {
       opacity: 0.9;
+      transform: translateY(-2px);
+    }
+
+    .btn-resume {
+      background-color: #10b981;
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      max-width: 400px;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    .btn-resume:hover {
+      background-color: #059669;
       transform: translateY(-2px);
     }
 
@@ -175,7 +214,7 @@
     .panel-title {
       font-size: 1rem;
       font-weight: bold;
-      color: #818cf8;
+      color: var(--accent-color);
       margin-bottom: 8px;
       border-bottom: 1px solid var(--card-border);
       padding-bottom: 6px;
@@ -188,7 +227,7 @@
     .player-name-input {
       background: transparent;
       border: 1px solid transparent;
-      color: #818cf8;
+      color: var(--accent-color);
       font-size: 1rem;
       font-weight: bold;
       padding: 2px 4px;
@@ -199,7 +238,7 @@
     }
 
     .player-name-input:hover, .player-name-input:focus {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(125, 125, 125, 0.1);
       border-color: var(--card-border);
     }
 
@@ -218,12 +257,7 @@
     }
 
     .options-panel {
-      background-color: #1e293b;
-      border-color: #334155;
-    }
-
-    .options-panel .panel-title {
-      color: #38bdf8;
+      border-color: var(--card-border);
     }
 
     /* Grille de numéros */
@@ -251,17 +285,19 @@
       user-select: none;
     }
 
+    .num-btn:hover {
+      background-color: var(--number-hover);
+    }
+
     .num-btn:active {
       transform: scale(0.95);
     }
 
-    /* Mode Normal : le chiffre devient invisible mais garde sa place */
     .num-btn.hidden-num {
       visibility: hidden;
       pointer-events: none;
     }
 
-    /* Mode Compact : le chiffre disparaît complètement et les autres comblent le vide */
     .compact-mode .num-btn.hidden-num {
       display: none;
     }
@@ -282,7 +318,7 @@
 
     .filter-btn {
       flex: 1;
-      background-color: #2b2d42;
+      background-color: var(--btn-bg);
       color: var(--text-color);
       border: 1px solid var(--card-border);
       border-radius: 6px;
@@ -294,16 +330,12 @@
       transition: background 0.15s, transform 0.1s;
     }
 
-    .filter-btn:active {
-      background-color: #404360;
-      transform: scale(0.98);
+    .filter-btn:hover {
+      background-color: var(--btn-hover);
     }
 
-    /* Style pour les boutons de reset par joueur sous la grille */
-    .known-container {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    .filter-btn:active {
+      transform: scale(0.98);
     }
 
     .player-resets-grid {
@@ -364,7 +396,7 @@
     .modal-title {
       font-size: 1.2rem;
       font-weight: bold;
-      color: #818cf8;
+      color: var(--accent-color);
     }
 
     .setting-item {
@@ -386,6 +418,7 @@
       border-radius: 6px;
       font-size: 1rem;
       outline: none;
+      width: 100%;
     }
 
     .modal-close-btn {
@@ -440,17 +473,18 @@
   <!-- Écran de sélection initial -->
   <div id="setup-screen">
     <h1>🔍 Deductio Helper</h1><br>
+    <button id="btn-resume-game" class="btn-resume hidden">▶️ Reprendre la denière partie</button>
     <div class="player-buttons">
-      <button class="btn-player" data-players="2"><img width="100%" src="images/2p.png"></button>
-      <button class="btn-player" data-players="3"><img width="100%" src="images/3p.png"></button>
-      <button class="btn-player" data-players="4"><img width="100%" src="images/4p.png"></button>
+      <button class="btn-player" data-players="2"><img width="100%" src="images/2p.png" alt="2 Joueurs"></button>
+      <button class="btn-player" data-players="3"><img width="100%" src="images/3p.png" alt="3 Joueurs"></button>
+      <button class="btn-player" data-players="4"><img width="100%" src="images/4p.png" alt="4 Joueurs"></button>
     </div>
   </div>
 
   <!-- Écran de jeu / Prise de notes -->
   <div id="notes-screen" class="hidden">
     <header>
-      <h2>🧠 Deductio Helper</h2>
+      <h2>🔍 Deductio Helper</h2>
       <div class="header-actions">
         <button class="btn-icon" id="btn-undo" title="Annuler le dernier effacement" disabled>🔄</button>
         <button class="btn-icon" id="btn-settings" title="Paramètres">⚙️</button>
@@ -471,19 +505,32 @@
   <div id="settings-modal" class="modal-overlay hidden">
     <div class="modal-content">
       <div class="modal-title">⚙️ Paramètres</div>
+      
       <div class="setting-item">
-        <label for="display-mode-select">Affichage :</label>
+        <label for="display-mode-select">Affichage de la grille :</label>
         <select id="display-mode-select">
           <option value="normal">Normal</option>
           <option value="compact">Compact</option>
         </select>
       </div>
+
+      <div class="setting-item">
+        <label for="theme-select">Thème :</label>
+        <select id="theme-select">
+          <option value="dark">Sombre</option>
+          <option value="light">Clair</option>
+        </select>
+      </div>
+
       <button class="modal-close-btn" id="btn-close-modal">Fermer</button>
     </div>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      const STORAGE_KEY = 'deductio_helper_save_v1';
+      const SETTINGS_KEY = 'deductio_helper_settings_v1';
+
       const setupScreen = document.getElementById('setup-screen');
       const notesScreen = document.getElementById('notes-screen');
       const topSection = document.getElementById('top-section');
@@ -494,40 +541,36 @@
       const settingsModal = document.getElementById('settings-modal');
       const btnCloseModal = document.getElementById('btn-close-modal');
       const displayModeSelect = document.getElementById('display-mode-select');
+      const themeSelect = document.getElementById('theme-select');
+      const btnResumeGame = document.getElementById('btn-resume-game');
 
       let actionHistory = [];
       let isCompactMode = false;
       let currentTotalPlayers = 0;
 
-      // Gestion de la modale des paramètres
-      btnSettings.addEventListener('click', () => {
-        settingsModal.classList.remove('hidden');
-      });
+      // Charger le thème enregistré
+      loadSettings();
 
-      btnCloseModal.addEventListener('click', () => {
-        settingsModal.classList.add('hidden');
-      });
+      // Vérification de sauvegarde de partie au démarrage
+      checkSavedGame();
 
+      // Events Modale
+      btnSettings.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+      btnCloseModal.addEventListener('click', () => settingsModal.classList.add('hidden'));
       settingsModal.addEventListener('click', (e) => {
-        if (e.target === settingsModal) {
-          settingsModal.classList.add('hidden');
-        }
+        if (e.target === settingsModal) settingsModal.classList.add('hidden');
       });
 
       displayModeSelect.addEventListener('change', (e) => {
         isCompactMode = e.target.value === 'compact';
         updateGridsDisplayMode();
+        saveGameState();
       });
 
-      function updateGridsDisplayMode() {
-        document.querySelectorAll('.numbers-grid').forEach(grid => {
-          if (isCompactMode) {
-            grid.classList.add('compact-mode');
-          } else {
-            grid.classList.remove('compact-mode');
-          }
-        });
-      }
+      themeSelect.addEventListener('change', (e) => {
+        applyTheme(e.target.value);
+        saveSettings();
+      });
 
       document.querySelectorAll('.btn-player').forEach(button => {
         button.addEventListener('click', () => {
@@ -536,44 +579,92 @@
         });
       });
 
+      btnResumeGame.addEventListener('click', resumeGame);
       btnReset.addEventListener('click', resetGame);
       btnUndo.addEventListener('click', undoLastAction);
 
-      function startGame(totalPlayers) {
+      function applyTheme(theme) {
+        if (theme === 'light') {
+          document.body.classList.add('light-theme');
+          themeSelect.value = 'light';
+        } else {
+          document.body.classList.remove('light-theme');
+          themeSelect.value = 'dark';
+        }
+      }
+
+      function saveSettings() {
+        const settings = { theme: themeSelect.value };
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+      }
+
+      function loadSettings() {
+        const saved = localStorage.getItem(SETTINGS_KEY);
+        if (saved) {
+          try {
+            const settings = JSON.parse(saved);
+            applyTheme(settings.theme || 'dark');
+          } catch (e) {
+            applyTheme('dark');
+          }
+        } else {
+          applyTheme('dark');
+        }
+      }
+
+      function checkSavedGame() {
+        const savedData = localStorage.getItem(STORAGE_KEY);
+        if (savedData) {
+          btnResumeGame.classList.remove('hidden');
+        } else {
+          btnResumeGame.classList.add('hidden');
+        }
+      }
+
+      function startGame(totalPlayers, isRestoring = false) {
         setupScreen.classList.add('hidden');
         notesScreen.classList.remove('hidden');
 
-        topSection.innerHTML = '';
-        bottomSection.innerHTML = '';
-        actionHistory = [];
-        updateUndoButton();
+        if (!isRestoring) {
+          topSection.innerHTML = '';
+          bottomSection.innerHTML = '';
+          actionHistory = [];
+        }
 
         if (totalPlayers === 2) {
           topSection.className = 'top-section cols-1';
-          topSection.appendChild(createPlayerPanel('Joueur 1', 1));
+          if (!isRestoring) topSection.appendChild(createPlayerPanel('Joueur 1', 1));
 
           bottomSection.className = 'bottom-section cols-1';
-          bottomSection.appendChild(createOptionsPanel());
+          if (!isRestoring) bottomSection.appendChild(createOptionsPanel());
         } 
         else if (totalPlayers === 3) {
           topSection.className = 'top-section cols-2';
-          topSection.appendChild(createPlayerPanel('Joueur 1', 1));
-          topSection.appendChild(createPlayerPanel('Joueur 2', 2));
+          if (!isRestoring) {
+            topSection.appendChild(createPlayerPanel('Joueur 1', 1));
+            topSection.appendChild(createPlayerPanel('Joueur 2', 2));
+          }
 
           bottomSection.className = 'bottom-section cols-1';
-          bottomSection.appendChild(createOptionsPanel());
+          if (!isRestoring) bottomSection.appendChild(createOptionsPanel());
         } 
         else if (totalPlayers === 4) {
           topSection.className = 'top-section cols-2';
-          topSection.appendChild(createPlayerPanel('Joueur 1', 1));
-          topSection.appendChild(createPlayerPanel('Joueur 2', 2));
+          if (!isRestoring) {
+            topSection.appendChild(createPlayerPanel('Joueur 1', 1));
+            topSection.appendChild(createPlayerPanel('Joueur 2', 2));
+          }
 
           bottomSection.className = 'bottom-section cols-2';
-          bottomSection.appendChild(createPlayerPanel('Joueur 3', 3));
-          bottomSection.appendChild(createOptionsPanel());
+          if (!isRestoring) {
+            bottomSection.appendChild(createPlayerPanel('Joueur 3', 3));
+            bottomSection.appendChild(createOptionsPanel());
+          }
         }
 
         updateGridsDisplayMode();
+        updateUndoButton();
+        if (!isRestoring) saveGameState();
       }
 
       function createPlayerPanel(name, id) {
@@ -610,12 +701,12 @@
           input.select();
         });
 
-        // Synchroniser le nom modifiable avec le bouton de reset sous la grille
         input.addEventListener('input', () => {
           const resetBtn = document.getElementById(`reset-btn-${id}`);
           if (resetBtn) {
             resetBtn.textContent = `🔄 ${input.value || `Joueur ${id}`}`;
           }
+          saveGameState();
         });
 
         panel.querySelectorAll('.filter-btn').forEach(btn => {
@@ -640,35 +731,26 @@
 
             actionHistory.push({
               type: 'filter',
-              buttons: numberButtonsToHide,
-              groupContainer: parentGroup
+              buttonSelectors: numberButtonsToHide.map(getElementSelector),
+              groupSelector: getElementSelector(parentGroup)
             });
+
             updateUndoButton();
+            saveGameState();
           });
         });
 
         panel.querySelectorAll('.num-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            hideSingleButton(btn);
-          });
+          btn.addEventListener('click', () => hideSingleButton(btn));
         });
 
         return panel;
-      }
-
-      function getVisibleNumbers(panel, predicate) {
-        return Array.from(panel.querySelectorAll('.num-btn')).filter(btn => {
-          if (btn.classList.contains('hidden-num')) return false;
-          const val = parseInt(btn.getAttribute('data-num'));
-          return predicate(val);
-        });
       }
 
       function createOptionsPanel() {
         const panel = document.createElement('div');
         panel.className = 'panel options-panel';
         
-        // Générer dynamiquement les boutons de reset sous la grille
         let playerResetsHtml = '';
         const numAdversaires = currentTotalPlayers - 1;
         
@@ -688,7 +770,6 @@
           </div>
         `;
 
-        // Événement clic sur les boutons de reset par joueur
         panel.querySelectorAll('.btn-reset-player').forEach(resetBtn => {
           const playerId = resetBtn.getAttribute('data-player-id');
           const playerInput = document.querySelector(`.player-panel[data-player-id="${playerId}"] .player-name-input`);
@@ -696,12 +777,9 @@
             resetBtn.textContent = `🔄 ${playerInput.value || `Joueur ${playerId}`}`;
           }
 
-          resetBtn.addEventListener('click', () => {
-            resetSpecificPlayer(playerId);
-          });
+          resetBtn.addEventListener('click', () => resetSpecificPlayer(playerId));
         });
 
-        // Événement au clic sur un nombre dans "Nombres Connus"
         panel.querySelectorAll('.num-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             const num = parseInt(btn.getAttribute('data-num'));
@@ -712,40 +790,62 @@
         return panel;
       }
 
+      function getVisibleNumbers(panel, predicate) {
+        return Array.from(panel.querySelectorAll('.num-btn')).filter(btn => {
+          if (btn.classList.contains('hidden-num')) return false;
+          const val = parseInt(btn.getAttribute('data-num'));
+          return predicate(val);
+        });
+      }
+
       function resetSpecificPlayer(playerId) {
         const playerPanel = document.querySelector(`.player-panel[data-player-id="${playerId}"]`);
         if (!playerPanel) return;
 
-        // 1. Réafficher tous les boutons numérotés du joueur SAUF ceux déjà masqués globalement dans "Nombres Connus"
+        let buttonsToRestore = [];
         playerPanel.querySelectorAll('.num-btn').forEach(btn => {
           const num = btn.getAttribute('data-num');
           const isKnownHidden = document.querySelector(`.options-panel .num-btn[data-num="${num}"]`).classList.contains('hidden-num');
           
-          if (!isKnownHidden) {
+          if (!isKnownHidden && btn.classList.contains('hidden-num')) {
             btn.classList.remove('hidden-num');
+            buttonsToRestore.push(btn);
           }
         });
 
-        // 2. Réafficher tous les groupes de filtres masqués (Pair/Impair, #/##)
+        let groupsToRestore = [];
         playerPanel.querySelectorAll('.filter-group').forEach(group => {
-          group.classList.remove('hidden');
+          if (group.classList.contains('hidden')) {
+            group.classList.remove('hidden');
+            groupsToRestore.push(group);
+          }
         });
+
+        if (buttonsToRestore.length > 0 || groupsToRestore.length > 0) {
+          actionHistory.push({
+            type: 'reset-player',
+            buttonSelectors: buttonsToRestore.map(getElementSelector),
+            groupSelectors: groupsToRestore.map(getElementSelector)
+          });
+          updateUndoButton();
+          saveGameState();
+        }
       }
 
       function createNumbersButtonsHTML() {
-        let html = '';
-        for (let i = 1; i <= 20; i++) {
-          html += `<button class="num-btn" data-num="${i}">${i}</button>`;
-        }
-        return html;
+        return Array.from({ length: 20 }, (_, i) => `<button class="num-btn" data-num="${i + 1}">${i + 1}</button>`).join('');
       }
 
       function hideSingleButton(btn) {
         if (btn.classList.contains('hidden-num')) return;
 
         btn.classList.add('hidden-num');
-        actionHistory.push({ type: 'single', buttons: [btn] });
+        actionHistory.push({
+          type: 'single',
+          buttonSelectors: [getElementSelector(btn)]
+        });
         updateUndoButton();
+        saveGameState();
       }
 
       function hideAllButtonsOfValue(num) {
@@ -755,30 +855,136 @@
         if (allMatchingButtons.length === 0) return;
 
         allMatchingButtons.forEach(btn => btn.classList.add('hidden-num'));
-        actionHistory.push({ type: 'all', buttons: allMatchingButtons });
+        actionHistory.push({
+          type: 'all',
+          buttonSelectors: allMatchingButtons.map(getElementSelector)
+        });
         updateUndoButton();
+        saveGameState();
       }
 
       function undoLastAction() {
         if (actionHistory.length === 0) return;
 
         const lastAction = actionHistory.pop();
-        lastAction.buttons.forEach(btn => btn.classList.remove('hidden-num'));
         
-        if (lastAction.groupContainer) {
-          lastAction.groupContainer.classList.remove('hidden');
+        if (lastAction.buttonSelectors) {
+          lastAction.buttonSelectors.forEach(selector => {
+            const el = document.querySelector(selector);
+            if (el) el.classList.remove('hidden-num');
+          });
+        }
+        
+        if (lastAction.groupSelector) {
+          const group = document.querySelector(lastAction.groupSelector);
+          if (group) group.classList.remove('hidden');
+        }
+
+        if (lastAction.groupSelectors) {
+          lastAction.groupSelectors.forEach(selector => {
+            const group = document.querySelector(selector);
+            if (group) group.classList.add('hidden');
+          });
         }
 
         updateUndoButton();
+        saveGameState();
       }
 
       function updateUndoButton() {
         btnUndo.disabled = actionHistory.length === 0;
       }
 
+      function updateGridsDisplayMode() {
+        document.querySelectorAll('.numbers-grid').forEach(grid => {
+          if (isCompactMode) {
+            grid.classList.add('compact-mode');
+          } else {
+            grid.classList.remove('compact-mode');
+          }
+        });
+      }
+
       function resetGame() {
+        localStorage.removeItem(STORAGE_KEY);
+        checkSavedGame();
         notesScreen.classList.add('hidden');
         setupScreen.classList.remove('hidden');
+      }
+
+      function getElementSelector(el) {
+        if (el.classList.contains('num-btn')) {
+          const panel = el.closest('.panel');
+          const isPlayer = panel.classList.contains('player-panel');
+          const playerId = isPlayer ? panel.getAttribute('data-player-id') : 'options';
+          const num = el.getAttribute('data-num');
+          return `[data-player-id="${playerId}"] .num-btn[data-num="${num}"], ${!isPlayer ? '.options-panel' : ''} .num-btn[data-num="${num}"]`;
+        }
+        if (el.classList.contains('filter-group')) {
+          const panel = el.closest('.player-panel');
+          const playerId = panel.getAttribute('data-player-id');
+          const isParity = el.classList.contains('parity-group');
+          return `.player-panel[data-player-id="${playerId}"] .${isParity ? 'parity-group' : 'digits-group'}`;
+        }
+        return '';
+      }
+
+      function saveGameState() {
+        if (!currentTotalPlayers) return;
+
+        const hiddenButtons = Array.from(document.querySelectorAll('.num-btn.hidden-num')).map(btn => getElementSelector(btn));
+        const hiddenGroups = Array.from(document.querySelectorAll('.filter-group.hidden')).map(group => getElementSelector(group));
+        const playerNames = Array.from(document.querySelectorAll('.player-panel')).map(panel => ({
+          id: panel.getAttribute('data-player-id'),
+          name: panel.querySelector('.player-name-input').value
+        }));
+
+        const state = {
+          currentTotalPlayers,
+          isCompactMode,
+          hiddenButtons,
+          hiddenGroups,
+          playerNames,
+          actionHistory
+        };
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        checkSavedGame();
+      }
+
+      function resumeGame() {
+        const savedData = localStorage.getItem(STORAGE_KEY);
+        if (!savedData) return;
+
+        const state = JSON.parse(savedData);
+        currentTotalPlayers = state.currentTotalPlayers;
+        isCompactMode = state.isCompactMode;
+        displayModeSelect.value = isCompactMode ? 'compact' : 'normal';
+
+        startGame(currentTotalPlayers, false);
+
+        state.playerNames.forEach(item => {
+          const input = document.querySelector(`.player-panel[data-player-id="${item.id}"] .player-name-input`);
+          if (input) {
+            input.value = item.name;
+            const resetBtn = document.getElementById(`reset-btn-${item.id}`);
+            if (resetBtn) resetBtn.textContent = `🔄 ${item.name || `Joueur ${item.id}`}`;
+          }
+        });
+
+        state.hiddenButtons.forEach(selector => {
+          const btn = document.querySelector(selector);
+          if (btn) btn.classList.add('hidden-num');
+        });
+
+        state.hiddenGroups.forEach(selector => {
+          const group = document.querySelector(selector);
+          if (group) group.classList.add('hidden');
+        });
+
+        actionHistory = state.actionHistory || [];
+        updateUndoButton();
+        updateGridsDisplayMode();
       }
     });
   </script>
