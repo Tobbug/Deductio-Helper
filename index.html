@@ -181,10 +181,12 @@
 
     .game-layout {
       display: grid;
-      grid-template-rows: 1fr 1fr;
+      grid-template-rows: auto auto;
       gap: 12px;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
       flex: 1;
-      min-height: calc(100vh - 70px);
     }
 
     .top-section, .bottom-section {
@@ -260,7 +262,7 @@
       border-color: var(--card-border);
     }
 
-    /* Grille de numéros */
+    /* Grille de numéros corrigée pour garder une belle taille proportionnée */
     .numbers-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -273,8 +275,7 @@
       color: var(--text-color);
       border: 1px solid var(--card-border);
       border-radius: 6px;
-      min-height: 40px;
-      aspect-ratio: 1;
+      height: 48px; /* Hauteur fixe parfaite qui évite l'écrasement */
       font-size: 1rem;
       font-weight: bold;
       cursor: pointer;
@@ -446,6 +447,7 @@
         display: flex;
         flex-direction: column;
         height: auto;
+        max-width: 100%;
       }
 
       .cols-2 {
@@ -462,7 +464,7 @@
       }
 
       .num-btn {
-        min-height: 40px;
+        height: 42px;
         font-size: 1rem;
       }
     }
@@ -473,7 +475,7 @@
   <!-- Écran de sélection initial -->
   <div id="setup-screen">
     <h1>🔍 Deductio Helper</h1><br>
-    <button id="btn-resume-game" class="btn-resume hidden">▶️ Reprendre la denière partie</button>
+    <button id="btn-resume-game" class="btn-resume hidden">▶️ Reprendre la dernière partie</button>
     <div class="player-buttons">
       <button class="btn-player" data-players="2"><img width="100%" src="images/2p.png" alt="2 Joueurs"></button>
       <button class="btn-player" data-players="3"><img width="100%" src="images/3p.png" alt="3 Joueurs"></button>
@@ -645,8 +647,12 @@
             topSection.appendChild(createPlayerPanel('Joueur 2', 2));
           }
 
-          bottomSection.className = 'bottom-section cols-1';
-          if (!isRestoring) bottomSection.appendChild(createOptionsPanel());
+          bottomSection.className = 'bottom-section cols-2';
+          if (!isRestoring) {
+            bottomSection.appendChild(createOptionsPanel());
+            const emptyDiv = document.createElement('div');
+            bottomSection.appendChild(emptyDiv);
+          }
         } 
         else if (totalPlayers === 4) {
           topSection.className = 'top-section cols-2';
