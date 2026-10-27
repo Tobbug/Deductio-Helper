@@ -23,6 +23,7 @@
       margin: 0;
       padding: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
@@ -35,16 +36,23 @@
 
     header {
       background-color: var(--card-bg);
-      padding: 12px 20px;
+      padding: 12px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid var(--card-border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    header h2 {
+      font-size: 1.2rem;
     }
 
     .header-actions {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
     }
 
@@ -52,10 +60,11 @@
       background-color: var(--btn-bg);
       color: var(--text-color);
       border: none;
-      padding: 8px 16px;
+      padding: 8px 14px;
       border-radius: 6px;
       cursor: pointer;
       font-weight: 600;
+      font-size: 0.9rem;
     }
 
     .btn-secondary:hover {
@@ -91,22 +100,29 @@
       flex: 1;
       gap: 20px;
       text-align: center;
+      padding: 20px;
     }
 
     .player-buttons {
       display: flex;
-      gap: 15px;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      max-width: 400px;
     }
 
     .btn-player {
       background-color: var(--accent-color);
       color: white;
       border: none;
-      padding: 16px 32px;
-      font-size: 1.2rem;
+      padding: 16px 24px;
+      font-size: 1.1rem;
       font-weight: bold;
       border-radius: 8px;
       cursor: pointer;
+      flex: 1;
+      min-width: 90px;
       transition: transform 0.1s, opacity 0.2s;
     }
 
@@ -120,21 +136,21 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 15px;
-      gap: 15px;
+      padding: 12px;
+      gap: 12px;
     }
 
     .game-layout {
       display: grid;
       grid-template-rows: 1fr 1fr;
-      gap: 15px;
+      gap: 12px;
       flex: 1;
-      height: calc(100vh - 80px);
+      min-height: calc(100vh - 70px);
     }
 
     .top-section, .bottom-section {
       display: grid;
-      gap: 15px;
+      gap: 12px;
       width: 100%;
     }
 
@@ -150,17 +166,17 @@
       background-color: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 10px;
-      padding: 15px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
       overflow-y: auto;
     }
 
     .panel-title {
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: bold;
       color: #818cf8;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       border-bottom: 1px solid var(--card-border);
       padding-bottom: 6px;
       display: flex;
@@ -173,9 +189,9 @@
       background: transparent;
       border: 1px solid transparent;
       color: #818cf8;
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: bold;
-      padding: 2px 6px;
+      padding: 2px 4px;
       border-radius: 4px;
       width: 100%;
       outline: none;
@@ -189,9 +205,10 @@
 
     .edit-icon {
       cursor: pointer;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       opacity: 0.6;
       user-select: none;
+      padding: 4px;
       transition: opacity 0.2s, transform 0.1s;
     }
 
@@ -214,7 +231,7 @@
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 6px;
-      margin-top: 5px;
+      margin-top: 4px;
     }
 
     .num-btn {
@@ -222,6 +239,7 @@
       color: var(--text-color);
       border: 1px solid var(--card-border);
       border-radius: 6px;
+      min-height: 40px;
       aspect-ratio: 1;
       font-size: 1rem;
       font-weight: bold;
@@ -233,14 +251,19 @@
       user-select: none;
     }
 
-    .num-btn:hover {
-      background-color: var(--number-hover);
-      transform: scale(1.05);
+    .num-btn:active {
+      transform: scale(0.95);
     }
 
+    /* Mode Normal : le chiffre devient invisible mais garde sa place */
     .num-btn.hidden-num {
       visibility: hidden;
       pointer-events: none;
+    }
+
+    /* Mode Compact : le chiffre disparaît complètement et les autres comblent le vide */
+    .compact-mode .num-btn.hidden-num {
+      display: none;
     }
 
     /* Options d'indices en dessous des numéros */
@@ -248,7 +271,7 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      margin-top: 10px;
+      margin-top: 8px;
     }
 
     .filter-group {
@@ -263,20 +286,152 @@
       color: var(--text-color);
       border: 1px solid var(--card-border);
       border-radius: 6px;
-      padding: 6px;
-      font-size: 1rem;
+      padding: 8px 4px;
+      min-height: 38px;
+      font-size: 0.95rem;
       font-weight: bold;
       cursor: pointer;
       transition: background 0.15s, transform 0.1s;
     }
 
-    .filter-btn:hover {
+    .filter-btn:active {
       background-color: #404360;
+      transform: scale(0.98);
+    }
+
+    /* Style pour les boutons de reset par joueur sous la grille */
+    .known-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .player-resets-grid {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .btn-reset-player {
+      background-color: var(--btn-bg);
+      color: var(--text-color);
+      border: 1px solid var(--card-border);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s, transform 0.1s;
+      flex: 1;
+      min-width: 90px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn-reset-player:hover {
+      background-color: var(--btn-hover);
       transform: translateY(-1px);
+    }
+
+    /* Fenêtre modale des paramètres */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .modal-content {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+      width: 90%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .modal-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #818cf8;
+    }
+
+    .setting-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .setting-item label {
+      font-size: 0.95rem;
+      color: var(--text-color);
+    }
+
+    .setting-item select {
+      background-color: var(--btn-bg);
+      color: var(--text-color);
+      border: 1px solid var(--card-border);
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .modal-close-btn {
+      background-color: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 5px;
     }
 
     .hidden {
       display: none !important;
+    }
+
+    /* --- RESPONSIVE MOBILE --- */
+    @media (max-width: 600px) {
+      header h2 {
+        font-size: 1rem;
+      }
+
+      .game-layout {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+      }
+
+      .cols-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        overflow-y: visible;
+      }
+
+      .numbers-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+      }
+
+      .num-btn {
+        min-height: 40px;
+        font-size: 1rem;
+      }
     }
   </style>
 </head>
@@ -299,6 +454,7 @@
       <h2>🧠 Deductio Helper</h2>
       <div class="header-actions">
         <button class="btn-icon" id="btn-undo" title="Annuler le dernier effacement" disabled>🔄</button>
+        <button class="btn-icon" id="btn-settings" title="Paramètres">⚙️</button>
         <button class="btn-secondary" id="btn-reset">Nouvelle Partie</button>
       </div>
     </header>
@@ -312,6 +468,21 @@
     </div>
   </div>
 
+  <!-- Pop-up des paramètres -->
+  <div id="settings-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-title">⚙️ Paramètres</div>
+      <div class="setting-item">
+        <label for="display-mode-select">Affichage des nombres effacés :</label>
+        <select id="display-mode-select">
+          <option value="normal">Normal (conserve les espaces vides)</option>
+          <option value="compact">Compact (réduit et comble le vide)</option>
+        </select>
+      </div>
+      <button class="modal-close-btn" id="btn-close-modal">Fermer</button>
+    </div>
+  </div>
+
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const setupScreen = document.getElementById('setup-screen');
@@ -320,13 +491,49 @@
       const bottomSection = document.getElementById('bottom-section');
       const btnReset = document.getElementById('btn-reset');
       const btnUndo = document.getElementById('btn-undo');
+      const btnSettings = document.getElementById('btn-settings');
+      const settingsModal = document.getElementById('settings-modal');
+      const btnCloseModal = document.getElementById('btn-close-modal');
+      const displayModeSelect = document.getElementById('display-mode-select');
 
       let actionHistory = [];
+      let isCompactMode = false;
+      let currentTotalPlayers = 0;
+
+      // Gestion de la modale des paramètres
+      btnSettings.addEventListener('click', () => {
+        settingsModal.classList.remove('hidden');
+      });
+
+      btnCloseModal.addEventListener('click', () => {
+        settingsModal.classList.add('hidden');
+      });
+
+      settingsModal.addEventListener('click', (e) => {
+        if (e.target === settingsModal) {
+          settingsModal.classList.add('hidden');
+        }
+      });
+
+      displayModeSelect.addEventListener('change', (e) => {
+        isCompactMode = e.target.value === 'compact';
+        updateGridsDisplayMode();
+      });
+
+      function updateGridsDisplayMode() {
+        document.querySelectorAll('.numbers-grid').forEach(grid => {
+          if (isCompactMode) {
+            grid.classList.add('compact-mode');
+          } else {
+            grid.classList.remove('compact-mode');
+          }
+        });
+      }
 
       document.querySelectorAll('.btn-player').forEach(button => {
         button.addEventListener('click', () => {
-          const totalPlayers = parseInt(button.getAttribute('data-players'));
-          startGame(totalPlayers);
+          currentTotalPlayers = parseInt(button.getAttribute('data-players'));
+          startGame(currentTotalPlayers);
         });
       });
 
@@ -344,45 +551,48 @@
 
         if (totalPlayers === 2) {
           topSection.className = 'top-section cols-1';
-          topSection.appendChild(createPlayerPanel('Joueur 1'));
+          topSection.appendChild(createPlayerPanel('Joueur 1', 1));
 
           bottomSection.className = 'bottom-section cols-1';
           bottomSection.appendChild(createOptionsPanel());
         } 
         else if (totalPlayers === 3) {
           topSection.className = 'top-section cols-2';
-          topSection.appendChild(createPlayerPanel('Joueur 1'));
-          topSection.appendChild(createPlayerPanel('Joueur 2'));
+          topSection.appendChild(createPlayerPanel('Joueur 1', 1));
+          topSection.appendChild(createPlayerPanel('Joueur 2', 2));
 
           bottomSection.className = 'bottom-section cols-1';
           bottomSection.appendChild(createOptionsPanel());
         } 
         else if (totalPlayers === 4) {
           topSection.className = 'top-section cols-2';
-          topSection.appendChild(createPlayerPanel('Joueur 1'));
-          topSection.appendChild(createPlayerPanel('Joueur 2'));
+          topSection.appendChild(createPlayerPanel('Joueur 1', 1));
+          topSection.appendChild(createPlayerPanel('Joueur 2', 2));
 
           bottomSection.className = 'bottom-section cols-2';
-          bottomSection.appendChild(createPlayerPanel('Joueur 3'));
+          bottomSection.appendChild(createPlayerPanel('Joueur 3', 3));
           bottomSection.appendChild(createOptionsPanel());
         }
+
+        updateGridsDisplayMode();
       }
 
-      function createPlayerPanel(name) {
+      function createPlayerPanel(name, id) {
         const panel = document.createElement('div');
-        panel.className = 'panel';
+        panel.className = 'panel player-panel';
+        panel.setAttribute('data-player-id', id);
         panel.innerHTML = `
           <div class="panel-title">
             <input type="text" value="${name}" class="player-name-input">
             <span class="edit-icon" title="Modifier le nom">✏️</span>
           </div>
           <div class="panel-content">
-            <div class="numbers-grid">
+            <div class="numbers-grid ${isCompactMode ? 'compact-mode' : ''}">
               ${createNumbersButtonsHTML()}
             </div>
             <div class="filter-options">
               <div class="filter-group parity-group">
-              <button class="filter-btn" data-action="impair">|</button>
+                <button class="filter-btn" data-action="impair">|</button>
                 <button class="filter-btn" data-action="pair">||</button>
               </div>
               <div class="filter-group digits-group">
@@ -401,7 +611,14 @@
           input.select();
         });
 
-        // Gestion des boutons de filtres (Pair/Impair et #/##)
+        // Synchroniser le nom modifiable avec le bouton de reset sous la grille
+        input.addEventListener('input', () => {
+          const resetBtn = document.getElementById(`reset-btn-${id}`);
+          if (resetBtn) {
+            resetBtn.textContent = `🔄 ${input.value || `Joueur ${id}`}`;
+          }
+        });
+
         panel.querySelectorAll('.filter-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             const action = btn.getAttribute('data-action');
@@ -431,7 +648,6 @@
           });
         });
 
-        // Événement au clic sur un nombre individuel
         panel.querySelectorAll('.num-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             hideSingleButton(btn);
@@ -452,16 +668,41 @@
       function createOptionsPanel() {
         const panel = document.createElement('div');
         panel.className = 'panel options-panel';
+        
+        // Générer dynamiquement les boutons de reset sous la grille
+        let playerResetsHtml = '';
+        const numAdversaires = currentTotalPlayers - 1;
+        
+        for (let i = 1; i <= numAdversaires; i++) {
+          playerResetsHtml += `
+            <button class="btn-reset-player" id="reset-btn-${i}" data-player-id="${i}">🔄 Joueur ${i}</button>
+          `;
+        }
+
         panel.innerHTML = `
           <div class="panel-title">Nombres Connus</div>
           <div class="panel-content">
-            <div class="numbers-grid">
+            <div class="numbers-grid ${isCompactMode ? 'compact-mode' : ''}">
               ${createNumbersButtonsHTML()}
             </div>
+            ${numAdversaires > 0 ? `<div class="player-resets-grid">${playerResetsHtml}</div>` : ''}
           </div>
         `;
 
-        // Événement au clic sur un nombre dans "Mes Options"
+        // Événement clic sur les boutons de reset par joueur
+        panel.querySelectorAll('.btn-reset-player').forEach(resetBtn => {
+          const playerId = resetBtn.getAttribute('data-player-id');
+          const playerInput = document.querySelector(`.player-panel[data-player-id="${playerId}"] .player-name-input`);
+          if (playerInput) {
+            resetBtn.textContent = `🔄 ${playerInput.value || `Joueur ${playerId}`}`;
+          }
+
+          resetBtn.addEventListener('click', () => {
+            resetSpecificPlayer(playerId);
+          });
+        });
+
+        // Événement au clic sur un nombre dans "Nombres Connus"
         panel.querySelectorAll('.num-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             const num = parseInt(btn.getAttribute('data-num'));
@@ -470,6 +711,26 @@
         });
 
         return panel;
+      }
+
+      function resetSpecificPlayer(playerId) {
+        const playerPanel = document.querySelector(`.player-panel[data-player-id="${playerId}"]`);
+        if (!playerPanel) return;
+
+        // 1. Réafficher tous les boutons numérotés du joueur SAUF ceux déjà masqués globalement dans "Nombres Connus"
+        playerPanel.querySelectorAll('.num-btn').forEach(btn => {
+          const num = btn.getAttribute('data-num');
+          const isKnownHidden = document.querySelector(`.options-panel .num-btn[data-num="${num}"]`).classList.contains('hidden-num');
+          
+          if (!isKnownHidden) {
+            btn.classList.remove('hidden-num');
+          }
+        });
+
+        // 2. Réafficher tous les groupes de filtres masqués (Pair/Impair, #/##)
+        playerPanel.querySelectorAll('.filter-group').forEach(group => {
+          group.classList.remove('hidden');
+        });
       }
 
       function createNumbersButtonsHTML() {
