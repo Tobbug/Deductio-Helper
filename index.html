@@ -262,7 +262,7 @@
       border-color: var(--card-border);
     }
 
-    /* Grille de numéros corrigée pour garder une belle taille proportionnée */
+    /* Grille de numéros */
     .numbers-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -275,7 +275,7 @@
       color: var(--text-color);
       border: 1px solid var(--card-border);
       border-radius: 6px;
-      height: 48px; /* Hauteur fixe parfaite qui évite l'écrasement */
+      height: 48px;
       font-size: 1rem;
       font-weight: bold;
       cursor: pointer;
@@ -855,6 +855,7 @@
       }
 
       function hideAllButtonsOfValue(num) {
+        // CORRECTION : On cible spécifiquement tous les boutons portant ce numéro (chez tous les joueurs ET dans la zone des connus)
         const allMatchingButtons = Array.from(document.querySelectorAll(`.num-btn[data-num="${num}"]`))
           .filter(btn => !btn.classList.contains('hidden-num'));
 
@@ -876,8 +877,9 @@
         
         if (lastAction.buttonSelectors) {
           lastAction.buttonSelectors.forEach(selector => {
-            const el = document.querySelector(selector);
-            if (el) el.classList.remove('hidden-num');
+            // CORRECTION : On utilise querySelectorAll pour s'assurer de réafficher TOUS les boutons correspondants au sélecteur
+            const elements = document.querySelectorAll(selector);
+            elements.forEach(el => el.classList.remove('hidden-num'));
           });
         }
         
@@ -919,13 +921,16 @@
       }
 
       function getElementSelector(el) {
-        if (el.classList.contains('num-btn')) {
-          const panel = el.closest('.panel');
-          const isPlayer = panel.classList.contains('player-panel');
-          const playerId = isPlayer ? panel.getAttribute('data-player-id') : 'options';
-          const num = el.getAttribute('data-num');
-          return `[data-player-id="${playerId}"] .num-btn[data-num="${num}"], ${!isPlayer ? '.options-panel' : ''} .num-btn[data-num="${num}"]`;
+        const num = el.getAttribute('data-num');
+        const panel = el.closest('.panel');
+        
+        if (panel && panel.classList.contains('player-panel')) {
+          const playerId = panel.getAttribute('data-player-id');
+          return `.player-panel[data-player-id="${playerId}"] .num-btn[data-num="${num}"]`;
+        } else if (panel && panel.classList.contains('options-panel')) {
+          return `.options-panel .num-btn[data-num="${num}"]`;
         }
+
         if (el.classList.contains('filter-group')) {
           const panel = el.closest('.player-panel');
           const playerId = panel.getAttribute('data-player-id');
@@ -979,8 +984,8 @@
         });
 
         state.hiddenButtons.forEach(selector => {
-          const btn = document.querySelector(selector);
-          if (btn) btn.classList.add('hidden-num');
+          const elements = document.querySelectorAll(selector);
+          elements.forEach(btn => btn.classList.add('hidden-num'));
         });
 
         state.hiddenGroups.forEach(selector => {
